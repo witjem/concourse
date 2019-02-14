@@ -8,8 +8,8 @@
 	branch = master
 [submodule "src/github.com/onsi/ginkgo"]
 	path = src/github.com/onsi/ginkgo
-	url = https://github.com/onsi/ginkgo
-	branch = master
+	url = https://github.com/topherbullock/ginkgo
+	branch = add-vet-flag
 [submodule "src/github.com/onsi/gomega"]
 	path = src/github.com/onsi/gomega
 	url = https://github.com/onsi/gomega
