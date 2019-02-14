@@ -12,7 +12,6 @@ if ! mount -t tmpfs none /tmp/concourse-pg-runner; then
 fi
 
 pushd ${GOPATH}/src/github.com/concourse/atc
-  go test -vet=off ./...
-  # go install github.com/onsi/ginkgo/ginkgo
-  # ginkgo -r -p -race "$@"
+  go install github.com/onsi/ginkgo/ginkgo
+  ginkgo -vet=off -r -p -race "$@"
 popd
