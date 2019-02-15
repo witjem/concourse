@@ -14,6 +14,8 @@ inputs:
 params:
   WEB_IP: ~
   PIPELINE_NAME:
+  WEB_USERNAME:
+  WEB_PASSWORD:
 
 run:
   path: concourse/ci/scripts/create-uber-pipeline

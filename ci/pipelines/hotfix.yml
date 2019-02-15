@@ -28,7 +28,7 @@ resources:
   type: s3
   source:
     bucket: concourse-releases
-    regexp: concourse-(3.13.2).tgz
+    regexp: concourse-(3\.13\..*).tgz
     access_key_id: ((concourse_release_bucket.access_key))
     secret_access_key: ((concourse_release_bucket.secret_key))
 
@@ -64,7 +64,7 @@ resources:
   type: git
   source:
     uri: https://github.com/concourse/concourse-bosh-deployment.git
-    branch: v3.13.0
+    branch: release/3.13.x
 
 - name: concourse-bosh-deployment-master
   type: git
@@ -260,67 +260,67 @@ jobs:
 #   - task: build
 #     file: concourse/ci/tsa.yml
 
-# - name: fly-rc
-#   public: true
-#   plan:
-#   - get: concourse
-#     trigger: true
-#     # passed: [atc, fly, go-concourse, tsa, baggageclaim, skymarshal, web, worker]
-#   - get: version
-#     trigger: true
-#   - get: final-version
-#     resource: version
-#     trigger: true
-#   - get: garden-runc
-#     trigger: true
-#   - aggregate:
-#     - task: build-linux
-#       file: concourse/ci/fly-build-linux.yml
-#     - task: build-darwin
-#       file: concourse/ci/fly-build-darwin.yml
-#     - task: build-windows
-#       file: concourse/ci/fly-build-windows.yml
-#   - task: build-release
-#     file: concourse/src/github.com/concourse/fly/ci/build-release.yml
-#   - put: fly-rc
-#     params:
-#       name: release/name
-#       tag: release/tag
-#       body: release/body
-#       globs: [release/artifacts/*]
+- name: fly-rc
+  public: true
+  plan:
+  - get: concourse
+    trigger: true
+    # passed: [atc, fly, go-concourse, tsa, baggageclaim, skymarshal, web, worker]
+  - get: version
+    trigger: true
+  - get: final-version
+    resource: version
+    trigger: true
+  - get: garden-runc
+    trigger: true
+  - aggregate:
+    - task: build-linux
+      file: concourse/ci/fly-build-linux.yml
+    - task: build-darwin
+      file: concourse/ci/fly-build-darwin.yml
+    - task: build-windows
+      file: concourse/ci/fly-build-windows.yml
+  - task: build-release
+    file: concourse/src/github.com/concourse/fly/ci/build-release.yml
+  - put: fly-rc
+    params:
+      name: release/name
+      tag: release/tag
+      body: release/body
+      globs: [release/artifacts/*]
 
-# - name: bosh-rc
-#   public: true
-#   plan:
-#   - aggregate:
-#     - get: concourse
-#       trigger: true
-#       passed: [fly-rc]
-#     - get: garden-runc
-#       trigger: true
-#       passed: [fly-rc]
-#     - get: version
-#       trigger: true
-#       passed: [fly-rc]
-#     - get: final-version
-#       trigger: true
-#       resource: version
-#       passed: [fly-rc]
-#     - get: fly-rc
-#       trigger: true
-#       passed: [fly-rc]
-#       params:
-#         globs: [fly_*]
-#     - get: postgres-release
-#       trigger: true
-#     - get: gcp-trusty-stemcell
-#       trigger: true
-#     - get: concourse-bosh-deployment
-#       trigger: true
-#   - task: create-bosh-rc
-#     file: concourse/ci/create-bosh-rc.yml
-#   - put: bosh-rc
-#     params: {file: bosh-rc/concourse-*.tgz}
+- name: bosh-rc
+  public: true
+  plan:
+  - aggregate:
+    - get: concourse
+      trigger: true
+      passed: [fly-rc]
+    - get: garden-runc
+      trigger: true
+      passed: [fly-rc]
+    - get: version
+      trigger: true
+      passed: [fly-rc]
+    - get: final-version
+      trigger: true
+      resource: version
+      passed: [fly-rc]
+    - get: fly-rc
+      trigger: true
+      passed: [fly-rc]
+      params:
+        globs: [fly_*]
+    - get: postgres-release
+      trigger: true
+    - get: gcp-trusty-stemcell
+      trigger: true
+    - get: concourse-bosh-deployment
+      trigger: true
+  - task: create-bosh-rc
+    file: concourse/ci/create-bosh-rc.yml
+  - put: bosh-rc
+    params: {file: bosh-rc/concourse-*.tgz}
 
 - name: bin-rc
   public: true
@@ -490,28 +490,28 @@ jobs:
   - aggregate:
     - get: concourse
       trigger: true
-      # passed: [bosh-rc]
+      passed: [bosh-rc]
     - get: bosh-rc
       trigger: true
-      # passed: [bosh-rc]
+      passed: [bosh-rc]
     - get: version
       trigger: true
-      # passed: [bosh-rc]
+      passed: [bosh-rc]
     - get: garden-runc
       trigger: true
-      # passed: [bosh-rc]
+      passed: [bosh-rc]
     - get: fly-rc
       trigger: true
-      # passed: [bosh-rc]
+      passed: [bosh-rc]
     - get: postgres-release
       trigger: true
-      # passed: [bosh-rc]
+      passed: [bosh-rc]
     - get: gcp-trusty-stemcell
       trigger: true
-      # passed: [bosh-rc]
+      passed: [bosh-rc]
     - get: concourse-bosh-deployment
       trigger: true
-      # passed: [bosh-rc]
+      passed: [bosh-rc]
     - get: final-release
     - get: concourse-bosh-deployment-master
   - put: delete-upgrade-deployment
@@ -716,28 +716,28 @@ jobs:
   plan:
   - aggregate:
     - get: concourse
-      # passed: [bosh-rc]
+      passed: [bosh-rc]
       trigger: true
     - get: bosh-rc
-      # passed: [bosh-rc]
+      passed: [bosh-rc]
       trigger: true
     - get: version
-      # passed: [bosh-rc]
+      passed: [bosh-rc]
       trigger: true
     - get: garden-runc
-      # passed: [bosh-rc]
+      passed: [bosh-rc]
       trigger: true
     - get: fly-rc
-      # passed: [bosh-rc]
+      passed: [bosh-rc]
       trigger: true
     - get: postgres-release
-      # passed: [bosh-rc]
+      passed: [bosh-rc]
       trigger: true
     - get: gcp-trusty-stemcell
-      # passed: [bosh-rc]
+      passed: [bosh-rc]
       trigger: true
     - get: concourse-bosh-deployment
-      # passed: [bosh-rc]
+      passed: [bosh-rc]
       trigger: true
   - put: wats-deployment
     params:
