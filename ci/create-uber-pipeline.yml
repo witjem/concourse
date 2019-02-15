@@ -8,10 +8,11 @@ image_resource:
 
 inputs:
 - name: concourse
+- name: endpoint-info
 - name: fly-rc
 
 params:
-  WEB_IP:
+  WEB_IP: ~
   PIPELINE_NAME:
 
 run:
