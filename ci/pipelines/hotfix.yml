@@ -8,9 +8,9 @@ resources:
 - name: concourse-head
   type: git
   source:
-    uri: git@github.com:concourse/concourse-bosh-release.git
-    branch: release/v4.2.3
-    private_key: ((concourse_repo_private_key))
+    uri: git@github.com:concourse/concourse.git
+    branch: release/4.2.x
+    private_key: ((concourse_concourse_repo_private_key))
 
 - name: github-release
   type: github-release
