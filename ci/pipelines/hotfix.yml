@@ -532,10 +532,8 @@ jobs:
       - final-release/concourse-*.tgz
       ops_files:
       - concourse-bosh-deployment-master/cluster/operations/dev-versions.yml
-      - concourse-bosh-deployment/cluster/operations/basic-auth.yml
+      - concourse-bosh-deployment/cluster/operations/no-auth.yml
       vars:
-        atc_basic_auth.username: test
-        atc_basic_auth.password: test
         db_persistent_disk_type: small
         db_vm_type: test
         deployment_name: concourse-test-upgrade-3-13-x
@@ -554,8 +552,6 @@ jobs:
   - task: create-test-pipeline
     file: concourse/ci/create-uber-pipeline.yml
     params:
-      WEB_USERNAME: "test"
-      WEB_PASSWORD: "test"
       PIPELINE_NAME: test-pipeline
   - put: bosh-rc-deployment
     resource: upgrade-deployment
@@ -568,10 +564,8 @@ jobs:
       - bosh-rc/concourse-*.tgz
       ops_files:
       - concourse-bosh-deployment/cluster/operations/dev-versions.yml
-      - concourse-bosh-deployment/cluster/operations/basic-auth.yml
+      - concourse-bosh-deployment/cluster/operations/no-auth.yml
       vars:
-        atc_basic_auth.username: test
-        atc_basic_auth.password: test
         db_persistent_disk_type: small
         db_vm_type: test
         deployment_name: concourse-test-upgrade-3-13-x
@@ -582,14 +576,9 @@ jobs:
   - task: verify-test-pipeline
     file: concourse/ci/verify-uber-pipeline.yml
     params:
-      WEB_USERNAME: "test"
-      WEB_PASSWORD: "test"
       PIPELINE_NAME: test-pipeline
   - task: testflight
     file: concourse/ci/testflight.yml
-    params:
-      ATC_USERNAME: "test"
-      ATC_PASSWORD: "test"
     timeout: 1h
 
 # - name: bosh-downgrade
@@ -749,10 +738,8 @@ jobs:
       - bosh-rc/concourse-*.tgz
       ops_files:
       - concourse-bosh-deployment/cluster/operations/dev-versions.yml
-      - concourse-bosh-deployment/cluster/operations/basic-auth.yml
+      - concourse-bosh-deployment/cluster/operations/no-auth.yml
       vars:
-        atc_basic_auth.username: test
-        atc_basic_auth.password: test
         db_persistent_disk_type: small
         db_vm_type: test
         deployment_name: concourse-wats-3-13-x
@@ -773,9 +760,6 @@ jobs:
     timeout: 1h
   - task: watsjs
     file: concourse/ci/watsjs.yml
-    params:
-      ATC_USERNAME: "test"
-      ATC_PASSWORD: "test"
     timeout: 1h
 
 - name: nightly
