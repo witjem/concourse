@@ -18,4 +18,5 @@ fly -t local set-pipeline -n -p "$PIPELINE_NAME" -c concourse/ci/pipelines/uber-
 
 fly -t local unpause-pipeline -p "$PIPELINE_NAME"
 
-fly -t local trigger-job -j "$PIPELINE_NAME/test-job"
+fly -t local trigger-job -w -j "$PIPELINE_NAME/test-job"
+
