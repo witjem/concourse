@@ -15,7 +15,8 @@ params:
   PIPELINES_PUBLICLY_VIEWABLE:
 
 inputs:
-  - name: concourse
+- name: concourse
+- name: endpoint-info
 
 run:
   path: concourse/ci/scripts/testflight
