@@ -27,7 +27,7 @@ resources:
 - name: version
   type: semver
   source:
-    initial_version: 3.13.2-rc.7
+    initial_version: 3.13.3-rc.5
     driver: gcs
     bucket: concourse-semver-resource-versions
     key: hotfix-3.13.x
@@ -108,7 +108,7 @@ resources:
   type: s3
   source:
     bucket: concourse-release-candidates
-    regexp: concourse-(3\.13\.2-rc.+)\.tgz
+    regexp: concourse-(3\.13\.\d+-rc.+)\.tgz
     access_key_id: ((concourse_release_bucket.access_key))
     secret_access_key: ((concourse_release_bucket.secret_key))
 
