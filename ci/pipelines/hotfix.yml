@@ -49,6 +49,12 @@ resources:
     repository: cloudfoundry/garden-runc-release
     regexp: 1.18.2
 
+- name: garden-runc-old
+  type: bosh-io-release
+  source:
+    repository: cloudfoundry/garden-runc-release
+    regexp: 1.13.1
+
 - name: garden-runc-src
   type: git
   source:
@@ -530,6 +536,7 @@ jobs:
     - get: garden-runc
       trigger: true
       passed: [bosh-rc]
+    - get: garden-runc-old
     - get: fly-rc
       trigger: true
       passed: [bosh-rc]
@@ -558,7 +565,7 @@ jobs:
       manifest: concourse-bosh-deployment-master/cluster/concourse.yml
       stemcells: [gcp-trusty-stemcell/*.tgz]
       releases:
-      - garden-runc/*.tgz
+      - garden-runc-old/*.tgz
       - postgres-release/*.tgz
       - final-release/concourse-*.tgz
       ops_files:
