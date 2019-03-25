@@ -3,7 +3,6 @@
 #   concourse/concourse                 release/((release_minor)).x
 #   concourse/concourse-bosh-release    release/((release_minor)).x
 #   concourse/concourse-bosh-deployment release/((release_minor)).x
-#   concourse/docs                      v((release_minor))
 #
 # everything else will be managed by the pipeline
 
@@ -936,7 +935,7 @@ resources:
   type: git
   source:
     uri: https://github.com/concourse/docs
-    branch: v((release_minor))
+    branch: master
 
 - name: docs-gh-pages
   type: git
