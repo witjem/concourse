@@ -177,11 +177,12 @@ jobs:
     - get: concourse
       passed: [unit, dev-image]
       trigger: true
-    - get: unit-image
-      passed: [unit, dev-image]
     - get: dev-image
       passed: [dev-image]
       params: {format: oci}
+      trigger: true
+    - get: unit-image
+      passed: [unit, dev-image]
     - get: postgres-image
       params: {format: oci}
   - task: testflight
@@ -198,11 +199,12 @@ jobs:
     - get: concourse
       passed: [unit, dev-image]
       trigger: true
-    - get: unit-image
-      passed: [unit, dev-image]
     - get: dev-image
       passed: [dev-image]
       params: {format: oci}
+      trigger: true
+    - get: unit-image
+      passed: [unit, dev-image]
     - get: postgres-image
       params: {format: oci}
   - task: watsjs
@@ -219,11 +221,12 @@ jobs:
     - get: concourse
       passed: [unit, dev-image]
       trigger: true
-    - get: unit-image
-      passed: [unit, dev-image]
     - get: dev-image
       passed: [dev-image]
       params: {format: oci}
+      trigger: true
+    - get: unit-image
+      passed: [unit, dev-image]
     - get: concourse-image
       params: {format: oci}
     - get: postgres-image
@@ -241,11 +244,12 @@ jobs:
     - get: concourse
       passed: [unit, dev-image]
       trigger: true
-    - get: unit-image
-      passed: [unit, dev-image]
     - get: dev-image
       passed: [dev-image]
       params: {format: oci}
+      trigger: true
+    - get: unit-image
+      passed: [unit, dev-image]
     - get: concourse-image
       params: {format: oci}
     - get: postgres-image
@@ -308,9 +312,9 @@ jobs:
       image: unit-image
       file: concourse/ci/tasks/k8s-delete.yml
       params:
-       KUBE_CONFIG: ((kube_config))
-       RELEASE_NAME: concourse-smoke-patch # TODO can't use release_minor
-       CONCOURSE_IMAGE: concourse/concourse-rc
+        KUBE_CONFIG: ((kube_config))
+        RELEASE_NAME: concourse-smoke-patch # TODO can't use release_minor
+        CONCOURSE_IMAGE: concourse/concourse-rc
   - task: deploy
     image: unit-image
     input_mapping: {image-info: concourse-rc-image}
@@ -330,9 +334,9 @@ jobs:
     image: unit-image
     file: concourse/ci/tasks/k8s-delete.yml
     params:
-     KUBE_CONFIG: ((kube_config))
-     RELEASE_NAME: concourse-smoke-patch # TODO can't use release_minor
-     CONCOURSE_IMAGE: concourse/concourse-rc
+      KUBE_CONFIG: ((kube_config))
+      RELEASE_NAME: concourse-smoke-patch # TODO can't use release_minor
+      CONCOURSE_IMAGE: concourse/concourse-rc
 
 - name: k8s-topgun
   public: true
