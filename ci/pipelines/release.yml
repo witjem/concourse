@@ -767,9 +767,9 @@ jobs:
       - concourse-linux/*.tgz
       - concourse-windows/*.zip
       - concourse-darwin/*.tgz
-      - fly-linux/fly-linux-*.tgz
-      - fly-windows/fly-windows-*.zip
-      - fly-darwin/fly-darwin-*.tgz
+      - fly-linux/fly-*-linux-*.tgz
+      - fly-windows/fly-*-windows-*.zip
+      - fly-darwin/fly-*-darwin-*.tgz
 
 - name: publish-bosh-release
   serial: true
