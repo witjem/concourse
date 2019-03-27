@@ -1,3 +1,9 @@
+# the following vars must be specified:
+#
+#   ((release_major)) the MAJOR version, e.g. 5
+#   ((release_minor)) the MAJOR.MINOR version, e.g. 5.1
+#   ((concourse_smoke_deployment_name)) a unique name for the smoke bosh deployment
+#
 # the following git branches need to be created:
 #
 #   concourse/concourse                 release/((release_minor)).x
@@ -11,9 +17,10 @@ resource_types:
   type: registry-image
   source: {repository: frodenas/gcs-resource}
 
+# needed for 'tag' file creation; can be removed once shipped
 - name: registry-image
   type: registry-image
-  source: {repository: concourse/registry-image-resource, tag: dev}
+  source: {repository: concourse/registry-image-resource}
 
 - name: bosh-release
   type: registry-image
@@ -77,7 +84,6 @@ groups:
   - publish-binaries
   - publish-image
   - publish-bosh-release
-  - publish-bosh-deployment
   - publish-docs
   - patch
 
@@ -312,7 +318,7 @@ jobs:
       file: concourse/ci/tasks/k8s-delete.yml
       params:
         KUBE_CONFIG: ((kube_config))
-        RELEASE_NAME: concourse-smoke-patch # TODO can't use release_minor
+        RELEASE_NAME: ((concourse_smoke_deployment_name))
         CONCOURSE_IMAGE: concourse/concourse-rc
   - task: deploy
     image: unit-image
@@ -320,21 +326,21 @@ jobs:
     file: concourse/ci/tasks/k8s-deploy.yml
     params:
       KUBE_CONFIG: ((kube_config))
-      RELEASE_NAME: concourse-smoke-patch # TODO can't use release_minor
+      RELEASE_NAME: ((concourse_smoke_deployment_name))
       CONCOURSE_IMAGE: concourse/concourse-rc
   - task: k8s-smoke
     image: unit-image
     file: concourse/ci/tasks/k8s-smoke.yml
     params:
       KUBE_CONFIG: ((kube_config))
-      RELEASE_NAME: concourse-smoke-patch # TODO can't use release_minor
+      RELEASE_NAME: ((concourse_smoke_deployment_name))
       MAX_TICKS: 180
   - task: delete
     image: unit-image
     file: concourse/ci/tasks/k8s-delete.yml
     params:
       KUBE_CONFIG: ((kube_config))
-      RELEASE_NAME: concourse-smoke-patch # TODO can't use release_minor
+      RELEASE_NAME: ((concourse_smoke_deployment_name))
       CONCOURSE_IMAGE: concourse/concourse-rc
 
 - name: k8s-topgun
@@ -578,7 +584,7 @@ jobs:
       stemcells:
       - gcp-xenial-stemcell/*.tgz
       vars:
-        deployment_name: concourse-smoke-patch # TODO can't use release_minor
+        deployment_name: ((concourse_smoke_deployment_name))
   - task: discover-bosh-endpoint-info
     file: concourse/ci/tasks/discover-bosh-endpoint-info.yml
     image: unit-image
@@ -586,7 +592,7 @@ jobs:
       BOSH_ENVIRONMENT: ((bosh_target))
       BOSH_CLIENT: ((bosh_client.id))
       BOSH_CLIENT_SECRET: ((bosh_client.secret))
-      BOSH_DEPLOYMENT: concourse-smoke-patch # TODO can't use release_minor
+      BOSH_DEPLOYMENT: ((concourse_smoke_deployment_name))
       BOSH_INSTANCE_GROUP: concourse
   - task: smoke
     image: unit-image
@@ -785,35 +791,6 @@ jobs:
       tarball: concourse-release/*.tgz
       version: version/version
 
-- name: publish-bosh-deployment
-  serial: true
-  plan:
-  - aggregate:
-    - get: concourse-boshio
-      trigger: true
-    - get: unit-image
-      passed: [shipit]
-    - get: cbd
-    - get: version
-      passed: [shipit]
-    - get: bpm-release
-      passed: [shipit]
-    - get: postgres-release
-      passed: [shipit]
-  # TODO: check that boshio version matches given version
-  - task: bump-versions
-    file: cbd/ci/bump-versions.yml
-    input_mapping: {concourse-bosh-deployment: cbd}
-    image: unit-image
-  - put: cbd
-    params:
-      repository: bumped-repo
-      merge: true
-  - put: cbd-master
-    params:
-      repository: bumped-repo
-      merge: true
-
 - name: publish-image
   serial: true
   plan:
@@ -827,6 +804,7 @@ jobs:
       passed: [shipit]
       params: {format: oci}
     - get: latest-version
+    - get: latest-of-same-major-version
   - task: docker-semver-tags
     file: concourse/ci/tasks/docker-semver-tags.yml
   - put: concourse-image
@@ -910,6 +888,14 @@ resources:
     repository: concourse
     access_token: ((concourse_github_release.access_token))
 
+- name: latest-of-same-major-version
+  type: github-release
+  source:
+    owner: concourse
+    repository: concourse
+    access_token: ((concourse_github_release.access_token))
+    tag_filter: '^v(((release_major))\.\d+\.\d+)$'
+
 - name: linux-rc
   type: gcs
   source:
@@ -978,7 +964,7 @@ resources:
     target: ((bosh_target))
     client: ((bosh_client.id))
     client_secret: ((bosh_client.secret))
-    deployment: concourse-smoke-patch # TODO can't use release_minor
+    deployment: ((concourse_smoke_deployment_name))
 
 - name: wings-deployment
   type: bosh-deployment
@@ -993,13 +979,6 @@ resources:
   source:
     uri: git@github.com:concourse/concourse-bosh-deployment.git
     branch: release/((release_minor)).x
-    private_key: ((concourse_deployment_repo_private_key))
-
-- name: cbd-master
-  type: git
-  source:
-    uri: git@github.com:concourse/concourse-bosh-deployment.git
-    branch: master
     private_key: ((concourse_deployment_repo_private_key))
 
 - name: charts
@@ -1020,10 +999,6 @@ resources:
     owner: concourse
     repository: concourse
     access_token: ((concourse_github_release.access_token))
-
-- name: concourse-boshio
-  type: bosh-io-release
-  source: {repository: concourse/concourse-bosh-release}
 
 - name: unit-image
   type: registry-image
