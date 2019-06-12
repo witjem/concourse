@@ -37,6 +37,7 @@ type Worker interface {
 	Satisfies(lager.Logger, WorkerSpec) bool
 
 	FindContainerByHandle(lager.Logger, int, string) (Container, bool, error)
+	//TODO K8s required for GET step
 	FindOrCreateContainer(
 		context.Context,
 		lager.Logger,
@@ -66,9 +67,100 @@ type gardenWorker struct {
 	helper          workerHelper
 }
 
+type k8sWorker struct {
+}
+
+func (k *k8sWorker) BuildContainers() int {
+	panic("implement me")
+}
+
+func (k *k8sWorker) Description() string {
+	panic("implement me")
+}
+
+func (k *k8sWorker) Name() string {
+	return "some-k8s-name"
+}
+
+func (k *k8sWorker) ResourceTypes() []atc.WorkerResourceType {
+	panic("implement me")
+}
+
+func (k *k8sWorker) Tags() atc.Tags {
+	panic("implement me")
+}
+
+func (k *k8sWorker) Uptime() time.Duration {
+	panic("implement me")
+}
+
+func (k *k8sWorker) IsOwnedByTeam() bool {
+	return false
+}
+
+func (k *k8sWorker) Ephemeral() bool {
+	panic("implement me")
+}
+
+func (k *k8sWorker) IsVersionCompatible(lager.Logger, version.Version) bool {
+	return true
+}
+
+func (k *k8sWorker) Satisfies(lager.Logger, WorkerSpec) bool {
+	return true
+}
+
+func (k *k8sWorker) FindContainerByHandle(lager.Logger, int, string) (Container, bool, error) {
+	panic("implement me")
+}
+
+func (k *k8sWorker) FindOrCreateContainer(
+	context.Context,
+	lager.Logger,
+	ImageFetchingDelegate,
+	db.ContainerOwner,
+	db.ContainerMetadata,
+	ContainerSpec,
+	creds.VersionedResourceTypes,
+) (Container, error) {
+	panic("implement me")
+}
+
+func (k *k8sWorker) FindVolumeForResourceCache(logger lager.Logger, resourceCache db.UsedResourceCache) (Volume, bool, error) {
+	panic("implement me")
+}
+
+func (k *k8sWorker) FindVolumeForTaskCache(lager.Logger, int, int, string, string) (Volume, bool, error) {
+	panic("implement me")
+}
+
+func (k *k8sWorker) CertsVolume(lager.Logger) (volume Volume, found bool, err error) {
+	panic("implement me")
+}
+
+func (k *k8sWorker) LookupVolume(lager.Logger, string) (Volume, bool, error) {
+	panic("implement me")
+}
+
+func (k *k8sWorker) CreateVolume(logger lager.Logger, spec VolumeSpec, teamID int, volumeType db.VolumeType) (Volume, error) {
+	panic("implement me")
+}
+
+func (k *k8sWorker) GardenClient() garden.Client {
+	panic("implement me")
+}
+
+func (worker *gardenWorker) GardenClient() garden.Client {
+	return worker.gardenClient
+}
+
 // NewGardenWorker constructs a Worker using the gardenWorker runtime implementation and allows container and volume
 // creation on a specific Garden worker.
 // A Garden Worker is comprised of: db.Worker, garden Client, container provider, and a volume client
+func NewK8sWorker() Worker {
+	return &k8sWorker{}
+}
+
 func NewGardenWorker(
 	gardenClient garden.Client,
 	volumeRepository db.VolumeRepository,
@@ -97,10 +189,6 @@ func NewGardenWorker(
 		buildContainers: numBuildContainers,
 		helper:          workerHelper,
 	}
-}
-
-func (worker *gardenWorker) GardenClient() garden.Client {
-	return worker.gardenClient
 }
 
 func (worker *gardenWorker) IsVersionCompatible(logger lager.Logger, comparedVersion version.Version) bool {
@@ -183,6 +271,7 @@ func (worker *gardenWorker) FindOrCreateContainer(
 		err               error
 	)
 
+	// TODO: we can eliminate state-checking because we want to tell k8s to start fresh every time
 	creatingContainer, createdContainer, containerHandle, err = worker.helper.findOrInitializeContainer(logger, owner, metadata)
 	if err != nil {
 		logger.Error("failed-to-find-container-in-db", err)

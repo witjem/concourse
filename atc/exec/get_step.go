@@ -214,6 +214,7 @@ func (step *GetStep) Run(ctx context.Context, state RunState) error {
 		ResourceTypes: step.resourceTypes,
 	}
 
+	// TODO: we only need one 'worker'
 	chosenWorker, err := step.workerPool.FindOrChooseWorkerForContainer(logger, resourceInstance.ContainerOwner(), containerSpec, workerSpec, step.strategy)
 	if err != nil {
 		return err

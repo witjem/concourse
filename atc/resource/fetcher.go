@@ -70,6 +70,7 @@ func (f *fetcher) Fetch(
 	ticker := f.clock.NewTicker(GetResourceLockInterval)
 	defer ticker.Stop()
 
+	// TODO: no need to lock, since we will be fetching in sequence
 	versionedSource, err := f.fetchWithLock(ctx, logger, source, imageFetchingDelegate.Stdout())
 	if err != ErrFailedToGetLock {
 		return versionedSource, err

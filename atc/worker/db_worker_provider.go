@@ -84,7 +84,7 @@ func (provider *dbWorkerProvider) RunningWorkers(logger lager.Logger) ([]Worker,
 		}
 
 		workerLog := logger.Session("running-worker")
-		worker := provider.NewGardenWorker(
+		worker := provider.NewK8sWorker(
 			workerLog,
 			tikTok,
 			savedWorker,
@@ -112,7 +112,7 @@ func (provider *dbWorkerProvider) FindWorkersForContainerByOwner(
 
 	var workers []Worker
 	for _, w := range dbWorkers {
-		worker := provider.NewGardenWorker(logger, clock.NewClock(), w, 0)
+		worker := provider.NewK8sWorker(logger, clock.NewClock(), w, 0)
 		if worker.IsVersionCompatible(logger, provider.workerVersion) {
 			workers = append(workers, worker)
 		}
@@ -138,7 +138,7 @@ func (provider *dbWorkerProvider) FindWorkerForContainer(
 		return nil, false, nil
 	}
 
-	worker := provider.NewGardenWorker(logger, clock.NewClock(), dbWorker, 0)
+	worker := provider.NewK8sWorker(logger, clock.NewClock(), dbWorker, 0)
 	if !worker.IsVersionCompatible(logger, provider.workerVersion) {
 		return nil, false, nil
 	}
@@ -162,7 +162,7 @@ func (provider *dbWorkerProvider) FindWorkerForVolume(
 		return nil, false, nil
 	}
 
-	worker := provider.NewGardenWorker(logger, clock.NewClock(), dbWorker, 0)
+	worker := provider.NewK8sWorker(logger, clock.NewClock(), dbWorker, 0)
 	if !worker.IsVersionCompatible(logger, provider.workerVersion) {
 		return nil, false, nil
 	}
@@ -210,4 +210,48 @@ func (provider *dbWorkerProvider) NewGardenWorker(logger lager.Logger, tikTok cl
 		savedWorker,
 		buildContainersCount,
 	)
+}
+
+func (provider *dbWorkerProvider) NewK8sWorker(logger lager.Logger, tikTok clock.Clock, savedWorker db.Worker, buildContainersCount int) Worker {
+	//gcf := NewGaRRRRRRientFactory(
+	//	provider.dbWorkerFactory,
+	//	logger.Session("garden-connection"),
+	//	savedWorker.Name(),
+	//	savedWorker.GardenAddr(),
+	//	provider.retryBackOffFactory,
+	//)
+
+	//gClient := gcf.NewClient()
+	//
+	//bClient := bclient.New("", transport.NewBaggageclaimRoundTripper(
+	//	savedWorker.Name(),
+	//	savedWorker.BaggageclaimURL(),
+	//	provider.dbWorkerFactory,
+	//	&http.Transport{
+	//		DisableKeepAlives:     true,
+	//		ResponseHeaderTimeout: provider.baggageclaimResponseHeaderTimeout,
+	//	},
+	//))
+
+	//volumeClient := NewVolumeClient(
+	//	bClient,
+	//	savedWorker,
+	//	clock.NewClock(),
+	//	provider.lockFactory,
+	//	provider.dbVolumeRepository,
+	//	provider.dbWorkerBaseResourceTypeFactory,
+	//	provider.dbTaskCacheFactory,
+	//	provider.dbWorkerTaskCacheFactory,
+	//)
+
+	//return NewGardenWorker(
+	//	gClient,
+	//	provider.dbVolumeRepository,
+	//	volumeClient,
+	//	provider.imageFactory,
+	//	provider.dbTeamFactory,
+	//	savedWorker,
+	//	buildContainersCount,
+	//)
+	return NewK8sWorker()
 }

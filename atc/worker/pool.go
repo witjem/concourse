@@ -39,6 +39,13 @@ type WorkerProvider interface {
 		savedWorker db.Worker,
 		numBuildWorkers int,
 	) Worker
+
+	NewK8sWorker(
+		logger lager.Logger,
+		tikTok clock.Clock,
+		savedWorker db.Worker,
+		numBuildWorkers int,
+	) Worker
 }
 
 var (

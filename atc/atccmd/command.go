@@ -706,6 +706,9 @@ func (cmd *RunCommand) constructBackendMembers(
 	resourceFactory := resource.NewResourceFactory()
 	dbResourceCacheFactory := db.NewResourceCacheFactory(dbConn, lockFactory)
 	fetchSourceFactory := resource.NewFetchSourceFactory(dbResourceCacheFactory, resourceFactory)
+
+
+	//TODO k8s add K8s specific resourceFetcher
 	resourceFetcher := resource.NewFetcher(clock.NewClock(), lockFactory, fetchSourceFactory)
 	dbResourceConfigFactory := db.NewResourceConfigFactory(dbConn, lockFactory)
 	imageResourceFetcherFactory := image.NewImageResourceFetcherFactory(

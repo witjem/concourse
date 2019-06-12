@@ -55,18 +55,44 @@ func (r *fetchSourceFactory) NewFetchSource(
 	session Session,
 	imageFetchingDelegate worker.ImageFetchingDelegate,
 ) FetchSource {
-	return &resourceInstanceFetchSource{
-		logger:                 logger,
-		worker:                 worker,
-		resourceInstance:       resourceInstance,
-		resourceTypes:          resourceTypes,
-		containerSpec:          containerSpec,
-		session:                session,
-		imageFetchingDelegate:  imageFetchingDelegate,
-		dbResourceCacheFactory: r.resourceCacheFactory,
-		resourceFactory:        r.resourceFactory,
+	//return &resourceInstanceFetchSource{
+	//	logger:                 logger,
+	//	worker:                 worker,
+	//	resourceInstance:       resourceInstance,
+	//	resourceTypes:          resourceTypes,
+	//	containerSpec:          containerSpec,
+	//	session:                session,
+	//	imageFetchingDelegate:  imageFetchingDelegate,
+	//	dbResourceCacheFactory: r.resourceCacheFactory,
+	//	resourceFactory:        r.resourceFactory,
+	//}
+	return &resourceInstanceFetchSourceK8s{
+		logger: logger,
+		worker: worker,
+		resourceInstance: resourceInstance,
 	}
 }
+
+type resourceInstanceFetchSourceK8s struct {
+	logger lager.Logger
+	worker worker.Worker
+	resourceInstance ResourceInstance
+}
+
+func (s *resourceInstanceFetchSourceK8s) LockName() (string, error) {
+	return s.resourceInstance.LockName(s.worker.Name())
+}
+
+func (s *resourceInstanceFetchSourceK8s) Find() (VersionedSource, bool, error) {
+	return nil, false, nil
+}
+
+func (s *resourceInstanceFetchSourceK8s) Create(ctx context.Context) (VersionedSource, error) {
+	// TODO k8s needs implementation here
+	panic("resourceInstanceFetchSourceK8s Create not implemented")
+	return nil, nil
+}
+
 
 type resourceInstanceFetchSource struct {
 	logger                 lager.Logger
@@ -85,6 +111,7 @@ func (s *resourceInstanceFetchSource) LockName() (string, error) {
 }
 
 func (s *resourceInstanceFetchSource) Find() (VersionedSource, bool, error) {
+	// always force cache miss
 	sLog := s.logger.Session("find")
 
 	volume, found, err := s.resourceInstance.FindOn(s.logger, s.worker)
@@ -94,6 +121,7 @@ func (s *resourceInstanceFetchSource) Find() (VersionedSource, bool, error) {
 	}
 
 	if !found {
+		// short-circuit this whole check
 		return nil, false, nil
 	}
 
