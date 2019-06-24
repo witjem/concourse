@@ -11,6 +11,7 @@ import (
 
 	"github.com/concourse/baggageclaim"
 	"github.com/concourse/concourse/atc/metric"
+	"github.com/concourse/concourse/atc/worker/gclient"
 
 	"code.cloudfoundry.org/garden"
 	"code.cloudfoundry.org/lager"
@@ -63,11 +64,11 @@ type Worker interface {
 	LookupVolume(lager.Logger, string) (Volume, bool, error)
 	CreateVolume(logger lager.Logger, spec VolumeSpec, teamID int, volumeType db.VolumeType) (Volume, error)
 
-	GardenClient() garden.Client
+	GardenClient() gclient.Client
 }
 
 type gardenWorker struct {
-	gardenClient    garden.Client
+	gardenClient    gclient.Client
 	volumeClient    VolumeClient
 	imageFactory    ImageFactory
 	dbWorker        db.Worker
@@ -79,7 +80,7 @@ type gardenWorker struct {
 // creation on a specific Garden worker.
 // A Garden Worker is comprised of: db.Worker, garden Client, container provider, and a volume client
 func NewGardenWorker(
-	gardenClient garden.Client,
+	gardenClient gclient.Client,
 	volumeRepository db.VolumeRepository,
 	volumeClient VolumeClient,
 	imageFactory ImageFactory,
@@ -108,7 +109,7 @@ func NewGardenWorker(
 	}
 }
 
-func (worker *gardenWorker) GardenClient() garden.Client {
+func (worker *gardenWorker) GardenClient() gclient.Client {
 	return worker.gardenClient
 }
 
