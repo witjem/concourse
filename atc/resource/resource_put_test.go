@@ -72,7 +72,7 @@ var _ = Describe("Resource Put", func() {
 
 	Describe("running", func() {
 		JustBeforeEach(func() {
-			fakeContainer.RunStub = func(spec garden.ProcessSpec, io garden.ProcessIO) (garden.Process, error) {
+			fakeContainer.RunStub = func(ctx context.Context, spec garden.ProcessSpec, io garden.ProcessIO) (garden.Process, error) {
 				if runOutError != nil {
 					return nil, runOutError
 				}
@@ -86,7 +86,7 @@ var _ = Describe("Resource Put", func() {
 				return outScriptProcess, nil
 			}
 
-			fakeContainer.AttachStub = func(processID string, io garden.ProcessIO) (garden.Process, error) {
+			fakeContainer.AttachStub = func(ctx context.Context, processID string, io garden.ProcessIO) (garden.Process, error) {
 				if attachOutError != nil {
 					return nil, attachOutError
 				}
@@ -190,7 +190,7 @@ var _ = Describe("Resource Put", func() {
 			It("reattaches to it", func() {
 				Expect(fakeContainer.AttachCallCount()).To(Equal(1))
 
-				pid, io := fakeContainer.AttachArgsForCall(0)
+				_, pid, io := fakeContainer.AttachArgsForCall(0)
 				Expect(pid).To(Equal(ResourceProcessID))
 
 				// send request on stdin in case process hasn't read it yet
@@ -288,7 +288,7 @@ var _ = Describe("Resource Put", func() {
 			It("specifies the process id in the process spec", func() {
 				Expect(fakeContainer.RunCallCount()).To(Equal(1))
 
-				spec, _ := fakeContainer.RunArgsForCall(0)
+				_, spec, _ := fakeContainer.RunArgsForCall(0)
 				Expect(spec.ID).To(Equal(ResourceProcessID))
 			})
 
@@ -307,7 +307,7 @@ var _ = Describe("Resource Put", func() {
 				streamOutSpec := fakeContainer.StreamOutArgsForCall(0)
 
 				Expect(fakeContainer.RunCallCount()).To(Equal(1))
-				spec, _ := fakeContainer.RunArgsForCall(0)
+				_, spec, _ := fakeContainer.RunArgsForCall(0)
 
 				Expect(streamSpec.Path).To(HavePrefix(spec.Args[0]))
 				Expect(streamSpec.Path).To(Equal(streamOutSpec.Path))
@@ -316,7 +316,7 @@ var _ = Describe("Resource Put", func() {
 			It("runs /opt/resource/out <source path> with the request on stdin", func() {
 				Expect(fakeContainer.RunCallCount()).To(Equal(1))
 
-				spec, io := fakeContainer.RunArgsForCall(0)
+				_, spec, io := fakeContainer.RunArgsForCall(0)
 				Expect(spec.Path).To(Equal("/opt/resource/out"))
 				Expect(spec.Args).To(ConsistOf("/tmp/build/put"))
 
@@ -466,7 +466,8 @@ var _ = Describe("Resource Put", func() {
 			cancel()
 			<-done
 			Expect(fakeContainer.StopCallCount()).To(Equal(1))
-			Expect(fakeContainer.StopArgsForCall(0)).To(BeFalse())
+			isStopped := fakeContainer.StopArgsForCall(0)
+			Expect(isStopped).To(BeFalse())
 			Expect(putErr).To(Equal(context.Canceled))
 		})
 

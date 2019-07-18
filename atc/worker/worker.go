@@ -185,7 +185,7 @@ func (worker *gardenWorker) FindOrCreateContainer(
 ) (Container, error) {
 
 	var (
-		gardenContainer   garden.Container
+		gardenContainer   gclient.Container
 		createdContainer  db.CreatedContainer
 		creatingContainer db.CreatingContainer
 		containerHandle   string
@@ -524,6 +524,7 @@ func (worker *gardenWorker) createVolumes(
 }
 
 func (worker *gardenWorker) FindContainerByHandle(logger lager.Logger, teamID int, handle string) (Container, bool, error) {
+	// TODO: does this require a real context?
 	gardenContainer, err := worker.gardenClient.Lookup(handle)
 	if err != nil {
 		if _, ok := err.(garden.ContainerNotFoundError); ok {

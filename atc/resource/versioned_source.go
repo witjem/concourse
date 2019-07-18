@@ -7,6 +7,7 @@ import (
 	"code.cloudfoundry.org/garden"
 	"github.com/concourse/concourse/atc"
 	"github.com/concourse/concourse/atc/worker"
+	"github.com/concourse/concourse/atc/worker/gclient"
 )
 
 //go:generate counterfeiter . VersionedSource
@@ -30,7 +31,7 @@ type versionResult struct {
 type putVersionedSource struct {
 	versionResult versionResult
 
-	container garden.Container
+	container gclient.Container
 
 	resourceDir string
 }
