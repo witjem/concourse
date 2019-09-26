@@ -4,6 +4,8 @@ import (
 	"net/http"
 	"time"
 
+	"github.com/concourse/concourse/atc/worker/image"
+
 	"github.com/concourse/concourse/atc"
 
 	"code.cloudfoundry.org/clock"
@@ -21,6 +23,7 @@ import (
 type dbWorkerProvider struct {
 	lockFactory                       lock.LockFactory
 	retryBackOffFactory               retryhttp.BackOffFactory
+	resourceFetcher                   Fetcher
 	imageFactory                      ImageFactory
 	dbResourceCacheFactory            db.ResourceCacheFactory
 	dbResourceConfigFactory           db.ResourceConfigFactory
@@ -37,7 +40,6 @@ type dbWorkerProvider struct {
 func NewDBWorkerProvider(
 	lockFactory lock.LockFactory,
 	retryBackOffFactory retryhttp.BackOffFactory,
-	imageFactory ImageFactory,
 	dbResourceCacheFactory db.ResourceCacheFactory,
 	dbResourceConfigFactory db.ResourceConfigFactory,
 	dbWorkerBaseResourceTypeFactory db.WorkerBaseResourceTypeFactory,
@@ -49,10 +51,19 @@ func NewDBWorkerProvider(
 	workerVersion version.Version,
 	baggageclaimResponseHeaderTimeout time.Duration,
 ) WorkerProvider {
+	fetchSourceFactory := NewFetchSourceFactory(dbResourceCacheFactory)
+	resourceFetcher := NewFetcher(clock.NewClock(), lockFactory, fetchSourceFactory)
+
+	imageResourceFetcherFactory := image.NewImageResourceFetcherFactory(
+		dbResourceCacheFactory,
+		dbResourceConfigFactory,
+		resourceFetcher,
+	)
+
 	return &dbWorkerProvider{
 		lockFactory:                       lockFactory,
 		retryBackOffFactory:               retryBackOffFactory,
-		imageFactory:                      imageFactory,
+		imageFactory:                      image.NewImageFactory(imageResourceFetcherFactory),
 		dbResourceCacheFactory:            dbResourceCacheFactory,
 		dbResourceConfigFactory:           dbResourceConfigFactory,
 		dbWorkerBaseResourceTypeFactory:   dbWorkerBaseResourceTypeFactory,
@@ -207,6 +218,7 @@ func (provider *dbWorkerProvider) NewGardenWorker(logger lager.Logger, savedWork
 		provider.dbVolumeRepository,
 		volumeClient,
 		provider.imageFactory,
+		provider.resourceFetcher,
 		provider.dbTeamFactory,
 		savedWorker,
 		buildContainersCount,
