@@ -25,4 +25,8 @@
 
 #### <sub><sup><a name="4507" href="#4507">:link:</a></sup></sub> fix
 
-* @iamjarvo fixed a [bug](444://github.com/concourse/concourse/issues/4472) where `fly builds` would show the wrong duration for cancelled builds #4507.
+* @iamjarvo fixed a [bug](https://github.com/concourse/concourse/issues/4472) where `fly builds` would show the wrong duration for cancelled builds #4507.
+
+#### <sub><sup><a name="4603" href="#4603">:link:</a></sup></sub> feature
+
+* Job builds can now be [re-run](https://concourse-ci.org/managing-jobs.html#fly-rerun-build) with their old inputs #4603.
