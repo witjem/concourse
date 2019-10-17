@@ -1945,7 +1945,7 @@ all =
                             , style "outline" "none"
                             , style "margin" "0"
                             , style "border-width" "0 0 0 1px"
-                            , style "border-color" darkGrey
+                            , style "border-color" darkGreen
                             , style "border-style" "solid"
                             ]
                 , test "hovered trigger build button is styled as a box of the secondary color of the build status" <|
@@ -1968,7 +1968,7 @@ all =
                             , style "outline" "none"
                             , style "margin" "0"
                             , style "border-width" "0 0 0 1px"
-                            , style "border-color" darkGrey
+                            , style "border-color" darkGreen
                             , style "border-style" "solid"
                             ]
                 , test "trigger build button has pointer cursor" <|
@@ -2096,7 +2096,7 @@ all =
                         , style "outline" "none"
                         , style "margin" "0"
                         , style "border-width" "0 0 0 1px"
-                        , style "border-color" darkGrey
+                        , style "border-color" darkRed
                         , style "border-style" "solid"
                         ]
             , test "hovered abort build button is styled as a dark red box" <|
@@ -2119,7 +2119,7 @@ all =
                         , style "outline" "none"
                         , style "margin" "0"
                         , style "border-width" "0 0 0 1px"
-                        , style "border-color" darkGrey
+                        , style "border-color" darkRed
                         , style "border-style" "solid"
                         ]
             , test "abort build button has pointer cursor" <|
