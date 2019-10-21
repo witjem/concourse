@@ -419,6 +419,23 @@ handleKeyPressed keyEvent ( model, effects ) =
                 else
                     ( model, effects )
 
+            ( Keyboard.R, True ) ->
+                ( model
+                , effects
+                    ++ (model.job
+                            |> Maybe.map
+                                (\j ->
+                                    RerunJobBuild
+                                        { teamName = j.teamName
+                                        , pipelineName = j.pipelineName
+                                        , jobName = j.jobName
+                                        , buildName = model.name
+                                        }
+                                )
+                            |> Maybe.Extra.toList
+                       )
+                )
+
             ( Keyboard.A, True ) ->
                 if Just (historyItem model) == List.head model.history then
                     ( model, DoAbortBuild model.id :: effects )
