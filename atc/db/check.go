@@ -144,13 +144,16 @@ func (c *check) Start() error {
 
 	defer Rollback(tx)
 
-	_, err = psql.Update("checks").
+	var startTime time.Time
+	err = psql.Update("checks").
 		Set("start_time", sq.Expr("now()")).
 		Where(sq.Eq{
 			"id": c.id,
 		}).
+		Suffix("RETURNING start_time").
 		RunWith(tx).
-		Exec()
+		QueryRow().
+		Scan(&startTime)
 	if err != nil {
 		return err
 	}
@@ -171,6 +174,8 @@ func (c *check) Start() error {
 		return err
 	}
 
+	c.startTime = startTime
+
 	return nil
 }
 
@@ -190,6 +195,7 @@ func (c *check) finish(status CheckStatus, checkError error) error {
 
 	defer Rollback(tx)
 
+	var endTime time.Time
 	builder := psql.Update("checks").
 		Set("status", status).
 		Set("end_time", sq.Expr("now()")).
@@ -201,9 +207,11 @@ func (c *check) finish(status CheckStatus, checkError error) error {
 		builder = builder.Set("check_error", checkError.Error())
 	}
 
-	_, err = builder.
+	err = builder.
+		Suffix("RETURNING end_time").
 		RunWith(tx).
-		Exec()
+		QueryRow().
+		Scan(&endTime)
 	if err != nil {
 		return err
 	}
@@ -231,6 +239,8 @@ func (c *check) finish(status CheckStatus, checkError error) error {
 	if err != nil {
 		return err
 	}
+
+	c.endTime = endTime
 
 	return nil
 }

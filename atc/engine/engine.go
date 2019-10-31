@@ -347,15 +347,15 @@ func (c *engineCheck) Run(logger lager.Logger) {
 		logger.Error("failed-to-start-check", err)
 		return
 	}
+
 	c.trackStarted(logger)
+	defer c.trackFinished(logger)
 
 	step, err := c.builder.CheckStep(c.check)
 	if err != nil {
 		logger.Error("failed-to-create-check-step", err)
 		return
 	}
-
-	defer c.trackFinished(logger)
 
 	logger.Info("running")
 
@@ -397,17 +397,6 @@ func (c *engineCheck) clearRunState() {
 }
 
 func (c *engineCheck) trackStarted(logger lager.Logger) {
-	found, err := c.check.Reload()
-	if err != nil {
-		logger.Error("failed-to-load-check-from-db", err)
-		return
-	}
-
-	if !found {
-		logger.Info("check-removed")
-		return
-	}
-
 	metric.CheckStarted{
 		CheckName:             c.check.Plan().Check.Name,
 		ResourceConfigScopeID: c.check.ResourceConfigScopeID(),
@@ -416,17 +405,6 @@ func (c *engineCheck) trackStarted(logger lager.Logger) {
 }
 
 func (c *engineCheck) trackFinished(logger lager.Logger) {
-	found, err := c.check.Reload()
-	if err != nil {
-		logger.Error("failed-to-load-check-from-db", err)
-		return
-	}
-
-	if !found {
-		logger.Info("check-removed")
-		return
-	}
-
 	metric.CheckFinished{
 		CheckName:             c.check.Plan().Check.Name,
 		ResourceConfigScopeID: c.check.ResourceConfigScopeID(),
