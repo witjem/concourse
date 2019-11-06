@@ -220,9 +220,15 @@ func (command *LoginCommand) authCodeGrant(targetUrl string, browserOnly bool) (
 		return "", "", errorMsg
 	}
 
+	fmt.Println("========================", tokenStr)
+
 	segments := strings.SplitN(tokenStr, " ", 2)
 
-	return segments[0], segments[1], nil
+	if len(segments) > 1 {
+		return segments[0], segments[1], nil
+	} else {
+		return "", "", fmt.Errorf("invalid token: %v", tokenStr)
+	}
 }
 
 func unmarshalToken(tokenValue string) (map[string]interface{}, error) {
@@ -322,7 +328,7 @@ func listenForTokenCallback(tokenChannel chan string, errorChannel chan error, p
 		Handler: http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Access-Control-Allow-Origin", targetUrl)
 			tokenChannel <- r.FormValue("token")
-			if (r.Header.Get("Upgrade-Insecure-Requests") != "") {
+			if r.Header.Get("Upgrade-Insecure-Requests") != "" {
 				http.Redirect(w, r, fmt.Sprintf("%s/fly_success?noop=true", targetUrl), http.StatusFound)
 			}
 		}),
