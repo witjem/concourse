@@ -75,23 +75,42 @@ type detectInputs struct {
 	inputs []string
 }
 
+func detectInputs(value interface{}) []string {
+	switch actual := value.(type) {
+	case string:
+		input := actual
+		if idx := strings.IndexByte(actual, '/'); idx >= 0 {
+			input = actual[:idx]
+		}
+		return []string{input}
+	case map[string]interface{}:
+		var inputs []string
+		for _, value := range actual {
+			inputs = append(inputs, detectInputs(value)...)
+		}
+		return inputs
+	case []interface{}:
+		var inputs []string
+		for _, value := range actual {
+			inputs = append(inputs, detectInputs(value)...)
+		}
+
+		return inputs
+	default:
+	}
+}
+
 func NewDetectInputs(params map[string]interface{}) PutInputs {
 	var inputs []string
+
 	for _, value := range params {
-		switch actual := value.(type) {
-		case string:
-			input := actual
-			if idx := strings.IndexByte(actual, '/'); idx >= 0 {
-				input = actual[:idx]
-			}
-			inputs = append(inputs, input)
-		default:
-		}
+		inputs = append(inputs, detectInputs(value)...)
 	}
+
 	return &detectInputs{
 		inputs: inputs,
 	}
-}
+})
 
 func (i detectInputs) FindAll(artifacts *artifact.Repository) ([]worker.InputSource, error) {
 	artifactsMap := artifacts.AsMap()
